@@ -28,7 +28,7 @@ fn main() {
         x: 1,
         y: 1,
         title: "title",
-        entries: vec!["a", "b", "c"],
+        entries: vec!["Input", "Output", "Constant"],
         selected: 0,
         visible: false,
     };

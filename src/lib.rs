@@ -1,6 +1,6 @@
 extern crate termion;
 
-use std::io::{stdin, stdout, Write};
+use std::io::{ Write};
 use termion::event::{Event, Key};
 use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
@@ -18,8 +18,8 @@ pub struct Popup {
 impl Popup {
     pub fn draw(&self, out: &mut dyn Write) {
         if(!self.visible) { return }
-        
-        let w = 16;
+
+        let w = self.title.len() + 2;
         let bar = "═".repeat(w);
     
         write!(
