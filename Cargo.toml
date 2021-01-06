@@ -1,5 +1,5 @@
 [package]
-name = "cli-util"
+name = "cli_util"
 version = "0.1.0"
 description = "cli support lib"
 repository = "https://github.com/arlac77/rust-cli-util"
