@@ -1,10 +1,8 @@
 extern crate termion;
 
-use std::io::{ Write};
-use termion::event::{Event, Key};
-use termion::input::{MouseTerminal, TermRead};
-use termion::raw::IntoRawMode;
-use termion::{color};
+use std::cmp::max;
+use std::io::Write;
+use termion::color;
 
 pub struct Popup {
     pub x: usize,
@@ -12,38 +10,53 @@ pub struct Popup {
     pub title: &'static str,
     pub entries: Vec<&'static str>,
     pub selected: usize,
-    pub visible: bool
+    pub visible: bool,
 }
 
 impl Popup {
-    pub fn draw(&self, out: &mut dyn Write) {
-        if(!self.visible) { return }
+    pub fn select_next(&mut self) {
+        if self.selected < self.entries.len() - 1 {
+            self.selected += 1;
+        }
+    }
 
-        let w = self.title.len() + 2;
+    pub fn select_previous(&mut self) {
+        if self.selected > 0 {
+            self.selected -= 1;
+        }
+    }
+
+    pub fn draw(&self, out: &mut dyn Write) {
+        if !self.visible {
+            return;
+        }
+
+        let w = max(
+            self.entries.iter().max_by_key(|x| x.len()).unwrap().len(),
+            self.title.len(),
+        ) + 2;
         let bar = "═".repeat(w);
-    
         write!(
             out,
-            "{}╔{}╗\n\r║{}{}║\n\r",
+            "{}╔{}╗{}║ {}{}║",
             termion::cursor::Goto(self.x as u16, self.y as u16),
             bar,
+            termion::cursor::Goto(self.x as u16, self.y as u16 + 1),
             self.title,
             termion::cursor::Goto((self.x + w) as u16 + 1, self.y as u16 + 1)
         )
         .unwrap();
-    
         let mut i = 0;
-    
         for e in &self.entries {
             let (color, uncolor) = if i == self.selected {
                 (color::Green.fg_str(), color::Black.fg_str())
             } else {
                 ("", "")
             };
-    
             write!(
                 out,
-                "║ {}{}{}{}║\n\r",
+                "{}║ {}{}{}{}║",
+                termion::cursor::Goto(self.x as u16, (self.y + i) as u16 + 2),
                 color,
                 e,
                 uncolor,
@@ -52,6 +65,6 @@ impl Popup {
             .unwrap();
             i = i + 1;
         }
-        write!(out, "╚{}╝", bar).unwrap();
+        write!(out, "{}╚{}╝", termion::cursor::Goto(self.x as u16, (self.y + i) as u16 + 2),bar).unwrap();
     }
 }

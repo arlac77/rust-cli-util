@@ -37,15 +37,21 @@ fn main() {
     while let Some(c) = stdin_iter.next() {
         let evt = c.unwrap();
 
-        pp.draw(&mut stdout);
-
         match evt {
             Event::Key(Key::Char('q')) => break,
             Event::Key(Key::Esc) => {
                 pp.visible = false;
-                pp.draw(&mut stdout);},
+                write!(
+                    stdout,
+                    "{}{}q",
+                    termion::clear::All,
+                    termion::cursor::Goto(x, y)
+                );
+                },
 
             Event::Key(Key::Char('p')) => {
+                pp.x = x as usize;
+                pp.y = y as usize;
                 pp.visible = true;
                 pp.draw(&mut stdout);
             }
@@ -59,14 +65,16 @@ fn main() {
             Event::Key(Key::Right) => x = x + 1,
             Event::Key(Key::Up) => {
                 y = y - 1;
-                if (pp.visible) {
-                    pp.selected = pp.selected - 1
+                if pp.visible {
+                    pp.select_previous();
+                    pp.draw(&mut stdout);
                 }
             }
             Event::Key(Key::Down) => {
                 y = y + 1;
-                if (pp.visible) {
-                    pp.selected = pp.selected + 1
+                if pp.visible {
+                    pp.select_next();
+                    pp.draw(&mut stdout);
                 }
             }
             _ => {}
