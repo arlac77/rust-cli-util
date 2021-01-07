@@ -1,11 +1,11 @@
 extern crate termion;
 
 use std::io::{stdin, stdout, Write};
-use termion::color;
 use termion::event::{Event, Key};
 use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
 
+use cli_util::Entry;
 use cli_util::Popup;
 
 fn main() {
@@ -28,7 +28,20 @@ fn main() {
         x: 1,
         y: 1,
         title: "title",
-        entries: vec!["Input", "Output", "Constant"],
+        entries: vec![
+            Entry {
+                title: "Input",
+                shortcut: 'i',
+            },
+            Entry {
+                title: "Output",
+                shortcut: 'o',
+            },
+            Entry {
+                title: "Constant",
+                shortcut: 'c',
+            },
+        ],
         selected: 0,
         visible: false,
     };
@@ -37,10 +50,12 @@ fn main() {
     while let Some(c) = stdin_iter.next() {
         let evt = c.unwrap();
 
+        pp.event(&evt);
+        pp.draw(&mut stdout);
+
         match evt {
             Event::Key(Key::Char('q')) => break,
             Event::Key(Key::Esc) => {
-                pp.visible = false;
                 write!(
                     stdout,
                     "{}{}q",
@@ -65,17 +80,9 @@ fn main() {
             Event::Key(Key::Right) => x = x + 1,
             Event::Key(Key::Up) => {
                 y = y - 1;
-                if pp.visible {
-                    pp.select_previous();
-                    pp.draw(&mut stdout);
-                }
             }
             Event::Key(Key::Down) => {
                 y = y + 1;
-                if pp.visible {
-                    pp.select_next();
-                    pp.draw(&mut stdout);
-                }
             }
             _ => {}
         }
