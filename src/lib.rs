@@ -3,12 +3,18 @@ extern crate termion;
 use std::cmp::max;
 use std::io::Write;
 use termion::color;
+use termion::event::{Event, Key};
+
+pub struct Entry {
+    pub shortcut: char,
+    pub title: &'static str,
+}
 
 pub struct Popup {
     pub x: usize,
     pub y: usize,
     pub title: &'static str,
-    pub entries: Vec<&'static str>,
+    pub entries: Vec<Entry>,
     pub selected: usize,
     pub visible: bool,
 }
@@ -26,13 +32,46 @@ impl Popup {
         }
     }
 
+    pub fn event(&mut self, evt: &Event) {
+        if self.visible {
+            match *evt {
+                Event::Key(Key::Esc) => {
+                    self.visible = false;
+                }
+                Event::Key(Key::Up) => {
+                    self.select_previous();
+                }
+                Event::Key(Key::Down) => {
+                    self.select_next();
+                }
+                Event::Key(c) => {
+                    let mut i = 0;
+
+                    for e in &self.entries {
+                        if c == Key::Char(e.shortcut) {
+                            self.selected = i;
+                            break;
+                        }
+                        i = i + 1;
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
     pub fn draw(&self, out: &mut dyn Write) {
         if !self.visible {
             return;
         }
 
         let w = max(
-            self.entries.iter().max_by_key(|x| x.len()).unwrap().len(),
+            self.entries
+                .iter()
+                .max_by_key(|x| x.title.len())
+                .unwrap()
+                .title
+                .len(),
             self.title.len(),
         ) + 2;
         let bar = "═".repeat(w);
@@ -58,7 +97,7 @@ impl Popup {
                 "{}║ {}{}{}{}║",
                 termion::cursor::Goto(self.x as u16, (self.y + i) as u16 + 2),
                 color,
-                e,
+                e.title,
                 uncolor,
                 termion::cursor::Goto((self.x + w) as u16 + 1, (self.y + i) as u16 + 2)
             )
