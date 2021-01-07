@@ -65,6 +65,12 @@ impl Popup {
             .unwrap();
             i = i + 1;
         }
-        write!(out, "{}╚{}╝", termion::cursor::Goto(self.x as u16, (self.y + i) as u16 + 2),bar).unwrap();
+        write!(
+            out,
+            "{}╚{}╝",
+            termion::cursor::Goto(self.x as u16, (self.y + i) as u16 + 2),
+            bar
+        )
+        .unwrap();
     }
 }

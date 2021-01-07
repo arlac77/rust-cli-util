@@ -47,7 +47,7 @@ fn main() {
                     termion::clear::All,
                     termion::cursor::Goto(x, y)
                 );
-                },
+            }
 
             Event::Key(Key::Char('p')) => {
                 pp.x = x as usize;
